@@ -142,12 +142,31 @@ namespace ConsoleApplicationSubStat.Base.Query
                     //get resulting collection count
                     int revisionsCount = revision_higher_then_saved.Count<RepositoryInfo>();
 
+
+
+                    int lastInjectedRevision = -1;
+                    int counter = 100;
+
                     Communicator.Communicator.NotifyRevisionsCountToInsert(revisionsCount);
                     foreach (var rev in revision_higher_then_saved)
                     {
 
                         AddRevisionToDB(context, rev);
-                      //  context.SubmitChanges();
+
+                        if (lastInjectedRevision != rev.Revision)
+                        {
+                            lastInjectedRevision = rev.Revision;
+                            counter--;
+                        }
+
+
+                        if (counter == 0)
+                        {
+                            counter = 100;
+                            context.SubmitChanges(); //submit
+                            context.Transaction.Commit(); //commit transaction 
+                            context.Transaction = context.Connection.BeginTransaction(); //begin another one
+                        }
 
                         Communicator.Communicator.NotifyRevisionInesrtedInDBAndAvailableCount(rev, --revisionsCount);
                     }

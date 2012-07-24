@@ -151,21 +151,25 @@ namespace ConsoleApplicationSubStat.Base.Query
                     foreach (var rev in revision_higher_then_saved)
                     {
 
-                        AddRevisionToDB(context, rev);
+                       
+                      
 
                         if (lastInjectedRevision != rev.Revision)
                         {
                             lastInjectedRevision = rev.Revision;
+                            if (counter == 0)
+                            {
+                                counter = 100;
+                                context.SubmitChanges(); //submit
+                                context.Transaction.Commit(); //commit transaction 
+                                context.Transaction = context.Connection.BeginTransaction(); //begin another one                               
+                            }
+
+
+                            AddRevisionToDB(context, rev);
+
+                           
                             counter--;
-                        }
-
-
-                        if (counter == 0)
-                        {
-                            counter = 100;
-                            context.SubmitChanges(); //submit
-                            context.Transaction.Commit(); //commit transaction 
-                            context.Transaction = context.Connection.BeginTransaction(); //begin another one
                         }
 
                         Communicator.Communicator.NotifyRevisionInesrtedInDBAndAvailableCount(rev, --revisionsCount);

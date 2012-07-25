@@ -29,7 +29,8 @@ namespace ConsoleApplicationSubStat.Base.Classes
     /// Class holds Revision's log information which will be stored in DB
     /// </summary>
     [Table(Name = "Revisions")]
-    public sealed class RevisionDB
+    public sealed class 
+        RevisionDB
     {
 
         public RevisionDB() { }
@@ -45,8 +46,13 @@ namespace ConsoleApplicationSubStat.Base.Classes
             Comment = repoInfo.UserComment;
 
             DateTime dateToSave;
-            if(DateTime.TryParse(repoInfo.Date, System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None, out dateToSave))
+
+            if (DateTime.TryParse(repoInfo.Date, out dateToSave))
                 Date = dateToSave;
+            else if (DateTime.TryParse(repoInfo.Date, System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None, out dateToSave))
+                Date = dateToSave;
+            else
+                throw new InvalidOperationException("Can not identify date time format of the repository");
         }
 
      
